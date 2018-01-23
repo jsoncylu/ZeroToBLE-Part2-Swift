@@ -21,8 +21,8 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
     @IBOutlet weak var disconnectButton: UIButton!
     
     // define our scanning interval times
-    let timerPauseInterval:NSTimeInterval = 10.0
-    let timerScanInterval:NSTimeInterval = 2.0
+    let timerPauseInterval:TimeInterval = 10.0
+    let timerScanInterval:TimeInterval = 2.0
     
     // UI-related
     let temperatureLabelFontName = "HelveticaNeue-Thin"
@@ -74,16 +74,16 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
         temperatureLabel.font = UIFont(name: temperatureLabelFontName, size: temperatureLabelFontSizeMessage)
         temperatureLabel.text = "Searching"
         humidityLabel.text = ""
-        humidityLabel.hidden = true
-        circleView.hidden = true
+        humidityLabel.isHidden = true
+        circleView.isHidden = true
         backgroundImageViews = [backgroundImageView1, backgroundImageView2]
-        view.bringSubviewToFront(backgroundImageViews[0])
+        view.bringSubview(toFront: backgroundImageViews[0])
         backgroundImageViews[0].alpha = 1
         backgroundImageViews[1].alpha = 0
-        view.bringSubviewToFront(controlContainerView)
+        view.bringSubview(toFront: controlContainerView)
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         if lastTemperature != defaultInitialTemperature {
             updateTemperatureDisplay()
         }
@@ -92,7 +92,7 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
     
     // MARK: - Handling User Interaction
     
-    @IBAction func handleDisconnectButtonTapped(sender: AnyObject) {
+    @IBAction func handleDisconnectButtonTapped(_ sender: AnyObject) {
         // if we don't have a sensor tag, start scanning for one...
         if sensorTag == nil {
             keepScanning = true
@@ -106,10 +106,10 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
     func disconnect() {
         if let sensorTag = self.sensorTag {
             if let tc = self.temperatureCharacteristic {
-                sensorTag.setNotifyValue(false, forCharacteristic: tc)
+                sensorTag.setNotifyValue(false, for: tc)
             }
             if let hc = self.humidityCharacteristic {
-                sensorTag.setNotifyValue(false, forCharacteristic: hc)
+                sensorTag.setNotifyValue(false, for: hc)
             }
             
             /*
@@ -133,22 +133,22 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
     func pauseScan() {
         // Scanning uses up battery on phone, so pause the scan process for the designated interval.
         print("*** PAUSING SCAN...")
-        _ = NSTimer(timeInterval: timerPauseInterval, target: self, selector: #selector(resumeScan), userInfo: nil, repeats: false)
+        _ = Timer(timeInterval: timerPauseInterval, target: self, selector: #selector(resumeScan), userInfo: nil, repeats: false)
         centralManager.stopScan()
-        disconnectButton.enabled = true
+        disconnectButton.isEnabled = true
     }
     
     func resumeScan() {
         if keepScanning {
             // Start scanning again...
             print("*** RESUMING SCAN!")
-            disconnectButton.enabled = false
+            disconnectButton.isEnabled = false
             temperatureLabel.font = UIFont(name: temperatureLabelFontName, size: temperatureLabelFontSizeMessage)
             temperatureLabel.text = "Searching"
-            _ = NSTimer(timeInterval: timerScanInterval, target: self, selector: #selector(pauseScan), userInfo: nil, repeats: false)
-            centralManager.scanForPeripheralsWithServices(nil, options: nil)
+            _ = Timer(timeInterval: timerScanInterval, target: self, selector: #selector(pauseScan), userInfo: nil, repeats: false)
+            centralManager.scanForPeripherals(withServices: nil, options: nil)
         } else {
-            disconnectButton.enabled = true
+            disconnectButton.isEnabled = true
         }
     }
     
@@ -159,7 +159,7 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
         if !circleDrawn {
             drawCircle()
         } else {
-            circleView.hidden = false
+            circleView.isHidden = false
         }
         
         updateBackgroundImageForTemperature(lastTemperature)
@@ -168,17 +168,17 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
     }
 
     func drawCircle() {
-        circleView.hidden = false
+        circleView.isHidden = false
         let circleLayer = CAShapeLayer()
-        circleLayer.path = UIBezierPath(ovalInRect: CGRectMake(0, 0, circleView.frame.width, circleView.frame.height)).CGPath
+        circleLayer.path = UIBezierPath(ovalIn: CGRect(x: 0, y: 0, width: circleView.frame.width, height: circleView.frame.height)).cgPath
         circleView.layer.addSublayer(circleLayer)
         circleLayer.lineWidth = 2
-        circleLayer.strokeColor = UIColor.whiteColor().CGColor
-        circleLayer.fillColor = UIColor.clearColor().CGColor
+        circleLayer.strokeColor = UIColor.white.cgColor
+        circleLayer.fillColor = UIColor.clear.cgColor
         circleDrawn = true
     }
     
-    func tensValue(temperature:Int) -> Int {
+    func tensValue(_ temperature:Int) -> Int {
         var temperatureTens = 10;
         if (temperature > 19) {
             if (temperature > 99) {
@@ -190,7 +190,7 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
         return temperatureTens
     }
     
-    func updateBackgroundImageForTemperature(temperature:Int) {
+    func updateBackgroundImageForTemperature(_ temperature:Int) {
         let temperatureTens = tensValue(temperature)
         if temperatureTens != lastTemperatureTens {
             // generate file name of new background to show
@@ -202,9 +202,9 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
             let invisibleBackground = backgroundImageViews[invisibleBackgroundIndex]
             invisibleBackground.image = UIImage(named: temperatureFilename)
             invisibleBackground.alpha = 0
-            view.bringSubviewToFront(invisibleBackground)
-            view.bringSubviewToFront(controlContainerView)
-            UIView.animateWithDuration(0.5, animations: { 
+            view.bringSubview(toFront: invisibleBackground)
+            view.bringSubview(toFront: controlContainerView)
+            UIView.animate(withDuration: 0.5, animations: { 
                     invisibleBackground.alpha = 1;
                 }, completion: { (finished) in
                     visibleBackground.alpha = 0
@@ -216,12 +216,12 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
         }
     }
     
-    func displayTemperature(data:NSData) {
+    func displayTemperature(_ data:Data) {
         // We'll get four bytes of data back, so we divide the byte count by two
         // because we're creating an array that holds two 16-bit (two-byte) values
-        let dataLength = data.length / sizeof(UInt16)
-        var dataArray = [UInt16](count:dataLength, repeatedValue: 0)
-        data.getBytes(&dataArray, length: dataLength * sizeof(Int16))
+        let dataLength = data.count / MemoryLayout<UInt16>.size
+        var dataArray = [UInt16](repeating: 0, count: dataLength)
+        (data as NSData).getBytes(&dataArray, length: dataLength * MemoryLayout<Int16>.size)
 
 //        // output values for debugging/diagnostic purposes
 //        for i in 0 ..< dataLength {
@@ -245,15 +245,15 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
         lastTemperature = temp
         print("*** LAST TEMPERATURE CAPTURED: \(lastTemperature)° F")
         
-        if UIApplication.sharedApplication().applicationState == .Active {
+        if UIApplication.shared.applicationState == .active {
             updateTemperatureDisplay()
         }
     }
 
-    func displayHumidity(data:NSData) {
-        let dataLength = data.length / sizeof(UInt16)
-        var dataArray = [UInt16](count:dataLength, repeatedValue: 0)
-        data.getBytes(&dataArray, length: dataLength * sizeof(Int16))
+    func displayHumidity(_ data:Data) {
+        let dataLength = data.count / MemoryLayout<UInt16>.size
+        var dataArray = [UInt16](repeating: 0, count: dataLength)
+        (data as NSData).getBytes(&dataArray, length: dataLength * MemoryLayout<Int16>.size)
         
         for i in 0 ..< dataLength {
             let nextInt:UInt16 = dataArray[i]
@@ -264,7 +264,7 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
         let calculatedHumidity = calculateRelativeHumidity(rawHumidity)
         print("*** HUMIDITY: \(calculatedHumidity)");
         humidityLabel.text = String(format: "Humidity: %.01f%%", calculatedHumidity)
-        humidityLabel.hidden = false
+        humidityLabel.isHidden = false
         
         // Humidity sensor also retrieves a temperature, which we don't use.
         // However, for instructional purposes, here's how to get at it to compare to the ambient sensor:
@@ -278,32 +278,32 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
     // MARK: - CBCentralManagerDelegate methods
     
     // Invoked when the central manager’s state is updated.
-    func centralManagerDidUpdateState(central: CBCentralManager) {
+    func centralManagerDidUpdateState(_ central: CBCentralManager) {
         var showAlert = true
         var message = ""
         
         switch central.state {
-        case .PoweredOff:
+        case .poweredOff:
             message = "Bluetooth on this device is currently powered off."
-        case .Unsupported:
+        case .unsupported:
             message = "This device does not support Bluetooth Low Energy."
-        case .Unauthorized:
+        case .unauthorized:
             message = "This app is not authorized to use Bluetooth Low Energy."
-        case .Resetting:
+        case .resetting:
             message = "The BLE Manager is resetting; a state update is pending."
-        case .Unknown:
+        case .unknown:
             message = "The state of the BLE Manager is unknown."
-        case .PoweredOn:
+        case .poweredOn:
             showAlert = false
             message = "Bluetooth LE is turned on and ready for communication."
             
             print(message)
             keepScanning = true
-            _ = NSTimer(timeInterval: timerScanInterval, target: self, selector: #selector(pauseScan), userInfo: nil, repeats: false)
+            _ = Timer(timeInterval: timerScanInterval, target: self, selector: #selector(pauseScan), userInfo: nil, repeats: false)
             
             // Initiate Scan for Peripherals
             //Option 1: Scan for all devices
-            centralManager.scanForPeripheralsWithServices(nil, options: nil)
+            centralManager.scanForPeripherals(withServices: nil, options: nil)
             
             // Option 2: Scan for devices that have the service you're interested in...
             //let sensorTagAdvertisingUUID = CBUUID(string: Device.SensorTagAdvertisingUUID)
@@ -313,10 +313,10 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
         }
         
         if showAlert {
-            let alertController = UIAlertController(title: "Central Manager State", message: message, preferredStyle: UIAlertControllerStyle.Alert)
-            let okAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.Cancel, handler: nil)
+            let alertController = UIAlertController(title: "Central Manager State", message: message, preferredStyle: UIAlertControllerStyle.alert)
+            let okAction = UIAlertAction(title: "OK", style: UIAlertActionStyle.cancel, handler: nil)
             alertController.addAction(okAction)
-            self.showViewController(alertController, sender: self)
+            self.show(alertController, sender: self)
         }
     }
     
@@ -336,26 +336,26 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
      RSSI - The current received signal strength indicator (RSSI) of the peripheral, in decibels.
 
      */
-    func centralManager(central: CBCentralManager, didDiscoverPeripheral peripheral: CBPeripheral, advertisementData: [String : AnyObject], RSSI: NSNumber) {
+    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         print("centralManager didDiscoverPeripheral - CBAdvertisementDataLocalNameKey is \"\(CBAdvertisementDataLocalNameKey)\"")
 
         // Retrieve the peripheral name from the advertisement data using the "kCBAdvDataLocalName" key
         if let peripheralName = advertisementData[CBAdvertisementDataLocalNameKey] as? String {
             print("NEXT PERIPHERAL NAME: \(peripheralName)")
-            print("NEXT PERIPHERAL UUID: \(peripheral.identifier.UUIDString)")
+            print("NEXT PERIPHERAL UUID: \(peripheral.identifier.uuidString)")
             
             if peripheralName == sensorTagName {
                 print("SENSOR TAG FOUND! ADDING NOW!!!")
                 // to save power, stop scanning for other devices
                 keepScanning = false
-                disconnectButton.enabled = true
+                disconnectButton.isEnabled = true
 
                 // save a reference to the sensor tag
                 sensorTag = peripheral
                 sensorTag!.delegate = self
                 
                 // Request a connection to the peripheral
-                centralManager.connectPeripheral(sensorTag!, options: nil)
+                centralManager.connect(sensorTag!, options: nil)
             }
         }
     }
@@ -367,7 +367,7 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
      This method is invoked when a call to connectPeripheral:options: is successful. 
      You typically implement this method to set the peripheral’s delegate and to discover its services.
     */
-    func centralManager(central: CBCentralManager, didConnectPeripheral peripheral: CBPeripheral) {
+    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("**** SUCCESSFULLY CONNECTED TO SENSOR TAG!!!")
     
         temperatureLabel.font = UIFont(name: temperatureLabelFontName, size: temperatureLabelFontSizeMessage)
@@ -388,7 +388,7 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
      Because connection attempts do not time out, a failed connection usually indicates a transient issue, 
      in which case you may attempt to connect to the peripheral again.
      */
-    func centralManager(central: CBCentralManager, didFailToConnectPeripheral peripheral: CBPeripheral, error: NSError?) {
+    func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
         print("**** CONNECTION TO SENSOR TAG FAILED!!!")
     }
     
@@ -402,15 +402,15 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
      
      Note that when a peripheral is disconnected, all of its services, characteristics, and characteristic descriptors are invalidated.
      */
-    func centralManager(central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: NSError?) {
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         print("**** DISCONNECTED FROM SENSOR TAG!!!")
         lastTemperature = 0
         updateBackgroundImageForTemperature(lastTemperature)
-        circleView.hidden = true
+        circleView.isHidden = true
         temperatureLabel.font = UIFont(name: temperatureLabelFontName, size: temperatureLabelFontSizeMessage)
         temperatureLabel.text = "Tap to search"
         humidityLabel.text = ""
-        humidityLabel.hidden = true
+        humidityLabel.isHidden = true
         if error != nil {
             print("****** DISCONNECTION DETAILS: \(error!.localizedDescription)")
         }
@@ -431,7 +431,7 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
      If unsuccessful, the error parameter returns the cause of the failure.
      */
     // When the specified services are discovered, the peripheral calls the peripheral:didDiscoverServices: method of its delegate object.
-    func peripheral(peripheral: CBPeripheral, didDiscoverServices error: NSError?) {
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         if error != nil {
             print("ERROR DISCOVERING SERVICES: \(error?.localizedDescription)")
             return
@@ -442,9 +442,9 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
             for service in services {
                 print("Discovered service \(service)")
                 // If we found either the temperature or the humidity service, discover the characteristics for those services.
-                if (service.UUID == CBUUID(string: Device.TemperatureServiceUUID)) ||
-                    (service.UUID == CBUUID(string: Device.HumidityServiceUUID)) {
-                    peripheral.discoverCharacteristics(nil, forService: service)
+                if (service.uuid == CBUUID(string: Device.TemperatureServiceUUID)) ||
+                    (service.uuid == CBUUID(string: Device.HumidityServiceUUID)) {
+                    peripheral.discoverCharacteristics(nil, for: service)
                 }
             }
         }
@@ -460,7 +460,7 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
      If successful, the error parameter is nil.
      If unsuccessful, the error parameter returns the cause of the failure.
      */
-    func peripheral(peripheral: CBPeripheral, didDiscoverCharacteristicsForService service: CBService, error: NSError?) {
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         if error != nil {
             print("ERROR DISCOVERING CHARACTERISTICS: \(error?.localizedDescription)")
             return
@@ -468,31 +468,31 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
         
         if let characteristics = service.characteristics {
             var enableValue:UInt8 = 1
-            let enableBytes = NSData(bytes: &enableValue, length: sizeof(UInt8))
+            let enableBytes = Data(bytes: UnsafePointer<UInt8>(&enableValue), count: sizeof(UInt8))
 
             for characteristic in characteristics {
                 // Temperature Data Characteristic
-                if characteristic.UUID == CBUUID(string: Device.TemperatureDataUUID) {
+                if characteristic.uuid == CBUUID(string: Device.TemperatureDataUUID) {
                     // Enable the IR Temperature Sensor notifications
                     temperatureCharacteristic = characteristic
-                    sensorTag?.setNotifyValue(true, forCharacteristic: characteristic)
+                    sensorTag?.setNotifyValue(true, for: characteristic)
                 }
                 
                 // Temperature Configuration Characteristic
-                if characteristic.UUID == CBUUID(string: Device.TemperatureConfig) {
+                if characteristic.uuid == CBUUID(string: Device.TemperatureConfig) {
                     // Enable IR Temperature Sensor
-                    sensorTag?.writeValue(enableBytes, forCharacteristic: characteristic, type: .WithResponse)
+                    sensorTag?.writeValue(enableBytes, for: characteristic, type: .withResponse)
                 }
                 
-                if characteristic.UUID == CBUUID(string: Device.HumidityDataUUID) {
+                if characteristic.uuid == CBUUID(string: Device.HumidityDataUUID) {
                     // Enable Humidity Sensor notifications
                     humidityCharacteristic = characteristic
-                    sensorTag?.setNotifyValue(true, forCharacteristic: characteristic)
+                    sensorTag?.setNotifyValue(true, for: characteristic)
                 }
                 
-                if characteristic.UUID == CBUUID(string: Device.HumidityConfig) {
+                if characteristic.uuid == CBUUID(string: Device.HumidityConfig) {
                     // Enable Humidity Temperature Sensor
-                    sensorTag?.writeValue(enableBytes, forCharacteristic: characteristic, type: .WithResponse)
+                    sensorTag?.writeValue(enableBytes, for: characteristic, type: .withResponse)
                 }
             }
         }
@@ -510,7 +510,7 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
      If successful, the error parameter is nil. 
      If unsuccessful, the error parameter returns the cause of the failure.
      */
-    func peripheral(peripheral: CBPeripheral, didUpdateValueForCharacteristic characteristic: CBCharacteristic, error: NSError?) {
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         if error != nil {
             print("ERROR ON UPDATING VALUE FOR CHARACTERISTIC: \(characteristic) - \(error?.localizedDescription)")
             return
@@ -518,9 +518,9 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
         
         // extract the data from the characteristic's value property and display the value based on the characteristic type
         if let dataBytes = characteristic.value {
-            if characteristic.UUID == CBUUID(string: Device.TemperatureDataUUID) {
+            if characteristic.uuid == CBUUID(string: Device.TemperatureDataUUID) {
                 displayTemperature(dataBytes)
-            } else if characteristic.UUID == CBUUID(string: Device.HumidityDataUUID) {
+            } else if characteristic.uuid == CBUUID(string: Device.HumidityDataUUID) {
                 displayHumidity(dataBytes)
             }
         }
@@ -529,12 +529,12 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
     
     // MARK: - TI Sensor Tag Utility Methods
     
-    func convertCelciusToFahrenheit(celcius:Double) -> Double {
+    func convertCelciusToFahrenheit(_ celcius:Double) -> Double {
         let fahrenheit = (celcius * 1.8) + Double(32)
         return fahrenheit
     }
     
-    func calculateRelativeHumidity(rawH:UInt16) -> Double {
+    func calculateRelativeHumidity(_ rawH:UInt16) -> Double {
         // clear status bits [1..0]
         let clearedH = rawH & ~0x003
         
@@ -544,7 +544,7 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
         return relativeHumidity
     }
     
-    func calculateHumidityTemperature(rawT:UInt16) -> Double {
+    func calculateHumidityTemperature(_ rawT:UInt16) -> Double {
         //-- calculate temperature [deg C] --
         let temp = -46.85 + 175.72/65536 * Double(rawT);
         return temp;

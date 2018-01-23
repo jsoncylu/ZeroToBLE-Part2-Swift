@@ -100,6 +100,7 @@
 				TargetAttributes = {
 					C80679BB1CB9B7ED009BCB93 = {
 						CreatedOnToolsVersion = 7.3;
+						LastSwiftMigration = 0830;
 					};
 				};
 			};
@@ -271,9 +272,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = BLETemperatureReaderSwift/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.cloudcity.BLETemperatureReaderSwift;
 				PRODUCT_NAME = BLETemperatureReaderSwift;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -282,9 +285,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = BLETemperatureReaderSwift/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.cloudcity.BLETemperatureReaderSwift;
 				PRODUCT_NAME = BLETemperatureReaderSwift;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
