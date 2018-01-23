@@ -130,22 +130,22 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
     
     // MARK: - Bluetooth scanning
     
-    func pauseScan() {
+    @objc func pauseScan() {
         // Scanning uses up battery on phone, so pause the scan process for the designated interval.
         print("*** PAUSING SCAN...")
-        _ = Timer(timeInterval: timerPauseInterval, target: self, selector: #selector(resumeScan), userInfo: nil, repeats: false)
+        _ = Timer.scheduledTimer(timeInterval: timerPauseInterval, target: self, selector: #selector(resumeScan), userInfo: nil, repeats: false)
         centralManager.stopScan()
         disconnectButton.isEnabled = true
     }
     
-    func resumeScan() {
+    @objc func resumeScan() {
         if keepScanning {
             // Start scanning again...
             print("*** RESUMING SCAN!")
             disconnectButton.isEnabled = false
             temperatureLabel.font = UIFont(name: temperatureLabelFontName, size: temperatureLabelFontSizeMessage)
             temperatureLabel.text = "Searching"
-            _ = Timer(timeInterval: timerScanInterval, target: self, selector: #selector(pauseScan), userInfo: nil, repeats: false)
+            _ = Timer.scheduledTimer(timeInterval: timerScanInterval, target: self, selector: #selector(pauseScan), userInfo: nil, repeats: false)
             centralManager.scanForPeripherals(withServices: nil, options: nil)
         } else {
             disconnectButton.isEnabled = true
@@ -299,7 +299,7 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
             
             print(message)
             keepScanning = true
-            _ = Timer(timeInterval: timerScanInterval, target: self, selector: #selector(pauseScan), userInfo: nil, repeats: false)
+            _ = Timer.scheduledTimer(timeInterval: timerScanInterval, target: self, selector: #selector(pauseScan), userInfo: nil, repeats: false)
             
             // Initiate Scan for Peripherals
             //Option 1: Scan for all devices
@@ -467,8 +467,8 @@ class TemperatureViewController: UIViewController, CBCentralManagerDelegate, CBP
         }
         
         if let characteristics = service.characteristics {
-            var enableValue:UInt8 = 1
-            let enableBytes = Data(bytes: UnsafePointer<UInt8>(&enableValue), count: sizeof(UInt8))
+            let enableValue:UInt8 = 1
+            let enableBytes = Data(bytes: [enableValue])
 
             for characteristic in characteristics {
                 // Temperature Data Characteristic
